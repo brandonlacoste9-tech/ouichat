@@ -181,6 +181,8 @@ API_BASE_URL=http://localhost:3000
 2. Implémenter le scraping web réel des sites gouvernementaux
 3. Gérer l'authentification et les limites de taux
 4. Ajouter un système de cache pour optimiser les performances
+5. **Implémenter la limitation de débit (rate limiting)** pour prévenir les abus
+6. Ajouter une authentification API pour les endpoints publics
 
 ## 🛠️ Technologies utilisées
 

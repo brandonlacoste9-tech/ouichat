@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { verifyRBQ, verifyREQ } = require('../services/licenseVerification');
 
+// Note: Rate limiting should be implemented for production use
+// Consider using express-rate-limit or similar middleware
+
 /**
  * GET /api/license/rbq/:licenseNumber
  * Vérifie une licence RBQ (Régie du bâtiment du Québec)
