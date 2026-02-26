@@ -1,6 +1,7 @@
 /**
  * 🦫 OuiChat Backend
- * Messagerie en temps réel pour le Québec
+ * Messagerie sécurisée pour ados du Québec
+ * Parent-approved messaging with safety monitoring
  */
 
 import express from "express";
@@ -9,6 +10,15 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { config } from "dotenv";
 import { v4 as uuidv4 } from "uuid";
+import { 
+  checkMessage, 
+  logSafetyEvent, 
+  updateLocation, 
+  getChildLocation,
+  getLocationHistory,
+  safetyLogs,
+  locationHistory
+} from "./src/safety";
 
 config();
 
@@ -24,109 +34,207 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(express.json());
 
-// Stockage en mémoire (remplacer par Supabase plus tard)
+// Stockage en mémoire
 const users = new Map();
 const messages = new Map();
-const conversations = new Map();
+const parentAccounts = new Map();
+const childAccounts = new Map();
 
-// Réponses de TI-GUY en joual québécois
-const TI_GUY_RESPONSES = [
-  "Salut mon chum! 🦫",
-  "Osti que c'est beau ça!",
-  "Tabarnouche, raconte-moi plus!",
-  "C'est la vie au Québec! ⚜️",
-  "T'as-tu essayé la poutine hier? 🍟",
-  "Go Habs Go! 🏒",
-  "Ben coudonc, c'est fou ça!",
-  "Parle-moi de ton projet!",
-  "Ça va bien mon ami?",
-  "Qu'est-ce qui neuf au Québec?",
+// Réponses de TI-GUY (safety mascot)
+const TI_GUY_SAFE_RESPONSES = [
+  "Salut! 🦫 Reste positif mon ami!",
+  "Oups! On utilise des mots gentils ici 😊",
+  "TI-GUY surveille pour ta sécurité!",
+  "C'est un beau jour pour chatter! 🍁",
+  "Tes parents peuvent voir tes messages, sois gentil!",
+  "On reste cool et respectueux! ⚜️",
 ];
 
 io.on("connection", (socket) => {
   console.log("👋 Nouvelle connexion:", socket.id);
 
-  // Utilisateur rejoint
-  socket.on("user:join", (userData) => {
-    const user = {
+  // Enregistrement parent
+  socket.on("parent:register", (data) => {
+    const parent = {
       id: socket.id,
-      username: userData.username || `Utilisateur_${socket.id.slice(0, 5)}`,
-      avatar: userData.avatar || "🦫",
-      status: "online",
+      type: 'parent',
+      username: data.username,
+      email: data.email,
+      children: [],
     };
-    users.set(socket.id, user);
-    socket.broadcast.emit("user:joined", user);
-    console.log(`✅ ${user.username} a rejoint le chat`);
+    parentAccounts.set(socket.id, parent);
+    users.set(socket.id, parent);
+    console.log(`👨‍👩‍👧 Parent enregistré: ${data.username}`);
   });
 
-  // Envoyer message
+  // Enregistrement enfant
+  socket.on("child:register", (data) => {
+    // Vérifier que le parent existe
+    const parent = parentAccounts.get(data.parentId);
+    if (!parent) {
+      socket.emit("error", { message: "Parent non trouvé" });
+      return;
+    }
+
+    const child = {
+      id: socket.id,
+      type: 'child',
+      username: data.username,
+      parentId: data.parentId,
+      age: data.age,
+      approvedContacts: [],
+      restrictions: {
+        timeLimit: data.restrictions?.timeLimit || 120, // minutes per day
+        allowedHours: data.restrictions?.allowedHours || { start: 7, end: 21 },
+        contentFilter: true,
+      }
+    };
+    
+    childAccounts.set(socket.id, child);
+    users.set(socket.id, child);
+    parent.children.push(socket.id);
+    
+    socket.emit("child:registered", { 
+      id: socket.id, 
+      username: child.username,
+      message: "Bienvenue sur OuiChat! TI-GUY veille sur toi 🦫"
+    });
+    
+    console.log(`👶 Enfant enregistré: ${data.username} (parent: ${parent.username})`);
+  });
+
+  // Envoyer message avec vérification sécurité
   socket.on("message:send", (data) => {
+    const sender = users.get(socket.id);
+    if (!sender) return;
+
+    // Vérifier contenu
+    const safetyCheck = checkMessage(data.content);
+    
+    // Si bloqué (contenu grave)
+    if (safetyCheck.action === 'block') {
+      socket.emit("message:blocked", {
+        reason: "Contenu inapproprié détecté",
+        flags: safetyCheck.flags,
+        tiGuyMessage: "Oups! Ce message n'est pas approprié. Tes parents ont été informés."
+      });
+      
+      // Log pour parent
+      if (sender.type === 'child') {
+        logSafetyEvent({
+          id: uuidv4(),
+          childId: socket.id,
+          childUsername: sender.username,
+          content: data.content,
+          flags: safetyCheck.flags,
+          severity: safetyCheck.severity,
+          timestamp: new Date(),
+          chatWith: data.recipientId,
+        });
+      }
+      return;
+    }
+
+    // Si avertissement (contenu léger)
+    if (safetyCheck.action === 'warn') {
+      socket.emit("message:warning", {
+        message: "⚠️ Attention à ton langage",
+        tiGuyMessage: TI_GUY_SAFE_RESPONSES[Math.floor(Math.random() * TI_GUY_SAFE_RESPONSES.length)]
+      });
+    }
+
     const message = {
       id: uuidv4(),
       content: data.content,
       senderId: socket.id,
-      sender: users.get(socket.id),
+      sender: sender,
+      recipientId: data.recipientId,
       timestamp: new Date(),
       type: data.type || "text",
-      conversationId: data.conversationId,
+      safetyChecked: true,
     };
 
-    // Sauvegarder message
+    // Sauvegarder et envoyer
     messages.set(message.id, message);
+    io.to(data.recipientId).emit("message:received", message);
+    socket.emit("message:sent", message);
 
-    // Diffuser à la conversation
-    io.to(data.conversationId).emit("message:received", message);
-
-    // Réponse de TI-GUY (chance aléatoire)
-    if (Math.random() < 0.1 && !data.content.includes("/nobot")) {
-      setTimeout(() => {
-        const botMessage = {
-          id: uuidv4(),
-          content: TI_GUY_RESPONSES[Math.floor(Math.random() * TI_GUY_RESPONSES.length)],
-          senderId: "ti-guy",
-          sender: { id: "ti-guy", username: "TI-GUY", avatar: "🦫", status: "online" },
-          timestamp: new Date(),
-          type: "text",
-          conversationId: data.conversationId,
-          isBot: true,
-        };
-        io.to(data.conversationId).emit("message:received", botMessage);
-      }, 2000);
+    // Log si flags détectés
+    if (!safetyCheck.clean && sender.type === 'child') {
+      logSafetyEvent({
+        id: uuidv4(),
+        childId: socket.id,
+        childUsername: sender.username,
+        content: data.content,
+        flags: safetyCheck.flags,
+        severity: safetyCheck.severity,
+        timestamp: new Date(),
+        chatWith: data.recipientId,
+      });
     }
   });
 
-  // Rejoindre conversation
-  socket.on("conversation:join", (conversationId) => {
-    socket.join(conversationId);
-    console.log(`${socket.id} a rejoint la conversation: ${conversationId}`);
+  // Mise à jour position GPS
+  socket.on("location:update", (data) => {
+    const user = users.get(socket.id);
+    if (!user || user.type !== 'child') return;
+
+    updateLocation({
+      userId: socket.id,
+      lat: data.lat,
+      lng: data.lng,
+      timestamp: new Date(),
+      accuracy: data.accuracy,
+    });
+
+    console.log(`📍 ${user.username} location: ${data.lat}, ${data.lng}`);
   });
 
-  // Message vocal
-  socket.on("message:voice", (data) => {
-    const message = {
-      id: uuidv4(),
-      content: "🎙️ Message vocal",
-      audioUrl: data.audioUrl,
-      senderId: socket.id,
-      sender: users.get(socket.id),
-      timestamp: new Date(),
-      type: "voice",
-      duration: data.duration,
-      conversationId: data.conversationId,
-    };
-    io.to(data.conversationId).emit("message:received", message);
+  // Parent demande position enfant
+  socket.on("parent:getLocation", (childId) => {
+    const parent = parentAccounts.get(socket.id);
+    if (!parent || !parent.children.includes(childId)) {
+      socket.emit("error", { message: "Accès refusé" });
+      return;
+    }
+
+    const location = getChildLocation(socket.id, childId);
+    const history = getLocationHistory(childId, 24);
+    
+    socket.emit("parent:locationData", {
+      childId,
+      current: location,
+      history: history.slice(-20), // Last 20 points
+    });
+  });
+
+  // Parent demande logs sécurité
+  socket.on("parent:getSafetyLogs", (childId) => {
+    const parent = parentAccounts.get(socket.id);
+    if (!parent || !parent.children.includes(childId)) {
+      socket.emit("error", { message: "Accès refusé" });
+      return;
+    }
+
+    const logs = safetyLogs.get(socket.id) || [];
+    const childLogs = logs.filter(l => l.childId === childId);
+    
+    socket.emit("parent:safetyLogs", {
+      childId,
+      logs: childLogs.slice(-50), // Last 50 events
+    });
   });
 
   // Indicateur de frappe
-  socket.on("typing:start", (conversationId) => {
-    socket.to(conversationId).emit("typing:start", {
+  socket.on("typing:start", (recipientId) => {
+    socket.to(recipientId).emit("typing:start", {
       userId: socket.id,
       username: users.get(socket.id)?.username,
     });
   });
 
-  socket.on("typing:stop", (conversationId) => {
-    socket.to(conversationId).emit("typing:stop", { userId: socket.id });
+  socket.on("typing:stop", (recipientId) => {
+    socket.to(recipientId).emit("typing:stop", { userId: socket.id });
   });
 
   // Déconnexion
@@ -134,22 +242,40 @@ io.on("connection", (socket) => {
     const user = users.get(socket.id);
     if (user) {
       user.status = "offline";
-      socket.broadcast.emit("user:left", user);
-      console.log(`👋 ${user.username} a quitté le chat`);
+      console.log(`👋 ${user.username} déconnecté`);
     }
   });
 });
 
-// Endpoints API REST
+// API Endpoints
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", utilisateurs: users.size, messages: messages.size });
+  res.json({ 
+    status: "ok", 
+    utilisateurs: users.size,
+    enfants: childAccounts.size,
+    parents: parentAccounts.size,
+    messages: messages.size 
+  });
 });
 
-app.get("/api/users", (req, res) => {
-  res.json(Array.from(users.values()));
+// Get all children for a parent
+app.get("/api/parent/:parentId/children", (req, res) => {
+  const parent = parentAccounts.get(req.params.parentId);
+  if (!parent) {
+    return res.status(404).json({ error: "Parent non trouvé" });
+  }
+  
+  const children = parent.children.map((id: string) => ({
+    id,
+    ...childAccounts.get(id),
+    location: getChildLocation(parent.id, id),
+  }));
+  
+  res.json(children);
 });
 
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
   console.log(`🦫 Serveur OuiChat démarré sur le port ${PORT}`);
+  console.log(`🔒 Mode sécurisé: parent-approved messaging activé`);
 });
