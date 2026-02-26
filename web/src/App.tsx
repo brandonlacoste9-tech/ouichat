@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAuthStore } from './stores/auth'
 
@@ -19,8 +19,12 @@ import { MiniAppsPage } from './pages/MiniApps'
 import { BeechatMonitorPage } from './pages/BeechatMonitor'
 import { LoginPage } from './pages/Login'
 
+// Tab routes that show the TabBar
+const TAB_ROUTES = ['/chats', '/contacts', '/discover', '/me', '/']
+
 function App() {
   const { isAuthenticated, checkAuth } = useAuthStore()
+  const location = useLocation()
 
   useEffect(() => {
     checkAuth()
@@ -29,6 +33,11 @@ function App() {
   if (!isAuthenticated) {
     return <LoginPage />
   }
+
+  // Check if current route is a tab route
+  const isTabRoute = TAB_ROUTES.some(route => 
+    route === '/' ? location.pathname === '/' : location.pathname.startsWith(route)
+  )
 
   return (
     <div className="h-screen flex flex-col bg-wechat-bg">
@@ -49,7 +58,7 @@ function App() {
           <Route path="/beechat-monitor" element={<BeechatMonitorPage />} />
         </Routes>
       </div>
-      <TabBar />
+      {isTabRoute && <TabBar />}
     </div>
   )
 }
