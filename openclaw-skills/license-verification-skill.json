@@ -1,0 +1,124 @@
+{
+  "name": "quebec-license-verification",
+  "version": "1.0.0",
+  "description": "OpenClaw skill for verifying RBQ and REQ licenses in Quebec",
+  "author": "Northern-Ventures",
+  "type": "api-skill",
+  "capabilities": [
+    "verify-rbq-license",
+    "verify-req-license",
+    "batch-verify-licenses"
+  ],
+  "endpoints": {
+    "verify_rbq": {
+      "method": "GET",
+      "path": "/api/license/rbq/{licenseNumber}",
+      "description": "Vérifie une licence RBQ (Régie du bâtiment du Québec)",
+      "parameters": {
+        "licenseNumber": {
+          "type": "string",
+          "required": true,
+          "description": "Numéro de licence RBQ au format XXXX-XXXX-XX",
+          "pattern": "^\\d{4}-\\d{4}-\\d{2}$"
+        }
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "licenseNumber": "string",
+          "type": "string",
+          "valid": "boolean",
+          "status": "string",
+          "holder": "object",
+          "categories": "array",
+          "message": "string"
+        }
+      }
+    },
+    "verify_req": {
+      "method": "GET",
+      "path": "/api/license/req/{licenseNumber}",
+      "description": "Vérifie une licence REQ/CMEQ (électricien)",
+      "parameters": {
+        "licenseNumber": {
+          "type": "string",
+          "required": true,
+          "description": "Numéro de licence REQ/CMEQ",
+          "pattern": "^\\d{4,6}$"
+        }
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "licenseNumber": "string",
+          "type": "string",
+          "valid": "boolean",
+          "status": "string",
+          "holder": "object",
+          "specialty": "string",
+          "message": "string"
+        }
+      }
+    },
+    "batch_verify": {
+      "method": "POST",
+      "path": "/api/license/verify",
+      "description": "Vérifie plusieurs licences en une seule requête",
+      "body": {
+        "type": "object",
+        "properties": {
+          "licenses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": "string",
+                "type": "string (RBQ ou REQ)"
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "results": "array"
+        }
+      }
+    }
+  },
+  "usage_examples": [
+    {
+      "name": "Vérifier une licence RBQ",
+      "command": "Vérifie la licence RBQ 5678-1234-01",
+      "expected_action": "GET /api/license/rbq/5678-1234-01"
+    },
+    {
+      "name": "Vérifier une licence REQ",
+      "command": "Vérifie la licence REQ 123456",
+      "expected_action": "GET /api/license/req/123456"
+    },
+    {
+      "name": "Vérification multiple",
+      "command": "Vérifie les licences suivantes: RBQ 5678-1234-01 et REQ 123456",
+      "expected_action": "POST /api/license/verify avec body approprié"
+    }
+  ],
+  "integration": {
+    "ti_guy": {
+      "enabled": true,
+      "description": "Intégration avec TI-GUY assistant pour vérification automatique de licences",
+      "triggers": [
+        "vérifie licence",
+        "check license",
+        "valider RBQ",
+        "valider REQ"
+      ]
+    }
+  },
+  "localization": {
+    "default_language": "fr-CA",
+    "supported_languages": ["fr-CA", "en-CA"],
+    "quebec_specific": true
+  }
+}
