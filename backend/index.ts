@@ -1,6 +1,6 @@
 /**
  * 🦫 OuiChat Backend
- * Real-time messaging for Quebec
+ * Messagerie en temps réel pour le Québec
  */
 
 import express from "express";
@@ -24,40 +24,42 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(express.json());
 
-// In-memory storage (replace with Supabase later)
+// Stockage en mémoire (remplacer par Supabase plus tard)
 const users = new Map();
 const messages = new Map();
 const conversations = new Map();
 
-// TI-GUY bot responses
+// Réponses de TI-GUY en joual québécois
 const TI_GUY_RESPONSES = [
   "Salut mon chum! 🦫",
   "Osti que c'est beau ça!",
   "Tabarnouche, raconte-moi plus!",
   "C'est la vie au Québec! ⚜️",
-  "T'as tu essayé la poutine hier? 🍟",
+  "T'as-tu essayé la poutine hier? 🍟",
   "Go Habs Go! 🏒",
   "Ben coudonc, c'est fou ça!",
   "Parle-moi de ton projet!",
+  "Ça va bien mon ami?",
+  "Qu'est-ce qui neuf au Québec?",
 ];
 
 io.on("connection", (socket) => {
-  console.log("👋 New connection:", socket.id);
+  console.log("👋 Nouvelle connexion:", socket.id);
 
-  // User joins
+  // Utilisateur rejoint
   socket.on("user:join", (userData) => {
     const user = {
       id: socket.id,
-      username: userData.username || `User_${socket.id.slice(0, 5)}`,
+      username: userData.username || `Utilisateur_${socket.id.slice(0, 5)}`,
       avatar: userData.avatar || "🦫",
       status: "online",
     };
     users.set(socket.id, user);
     socket.broadcast.emit("user:joined", user);
-    console.log(`✅ ${user.username} joined`);
+    console.log(`✅ ${user.username} a rejoint le chat`);
   });
 
-  // Send message
+  // Envoyer message
   socket.on("message:send", (data) => {
     const message = {
       id: uuidv4(),
@@ -69,13 +71,13 @@ io.on("connection", (socket) => {
       conversationId: data.conversationId,
     };
 
-    // Save message
+    // Sauvegarder message
     messages.set(message.id, message);
 
-    // Broadcast to conversation
+    // Diffuser à la conversation
     io.to(data.conversationId).emit("message:received", message);
 
-    // TI-GUY bot response (random chance)
+    // Réponse de TI-GUY (chance aléatoire)
     if (Math.random() < 0.1 && !data.content.includes("/nobot")) {
       setTimeout(() => {
         const botMessage = {
@@ -93,13 +95,13 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Join conversation
+  // Rejoindre conversation
   socket.on("conversation:join", (conversationId) => {
     socket.join(conversationId);
-    console.log(`${socket.id} joined conversation: ${conversationId}`);
+    console.log(`${socket.id} a rejoint la conversation: ${conversationId}`);
   });
 
-  // Voice message
+  // Message vocal
   socket.on("message:voice", (data) => {
     const message = {
       id: uuidv4(),
@@ -115,7 +117,7 @@ io.on("connection", (socket) => {
     io.to(data.conversationId).emit("message:received", message);
   });
 
-  // Typing indicator
+  // Indicateur de frappe
   socket.on("typing:start", (conversationId) => {
     socket.to(conversationId).emit("typing:start", {
       userId: socket.id,
@@ -127,20 +129,20 @@ io.on("connection", (socket) => {
     socket.to(conversationId).emit("typing:stop", { userId: socket.id });
   });
 
-  // Disconnect
+  // Déconnexion
   socket.on("disconnect", () => {
     const user = users.get(socket.id);
     if (user) {
       user.status = "offline";
       socket.broadcast.emit("user:left", user);
-      console.log(`👋 ${user.username} left`);
+      console.log(`👋 ${user.username} a quitté le chat`);
     }
   });
 });
 
-// REST API endpoints
+// Endpoints API REST
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", users: users.size, messages: messages.size });
+  res.json({ status: "ok", utilisateurs: users.size, messages: messages.size });
 });
 
 app.get("/api/users", (req, res) => {
@@ -149,5 +151,5 @@ app.get("/api/users", (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
-  console.log(`🦫 OuiChat server running on port ${PORT}`);
+  console.log(`🦫 Serveur OuiChat démarré sur le port ${PORT}`);
 });

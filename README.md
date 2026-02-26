@@ -1,83 +1,89 @@
 # 🦫 OuiChat
 
-**Le WeChat du Québec** - A Quebec-themed messaging app with TI-GUY integration!
+**Le WeChat du Québec** - Une application de messagerie avec la culture québécoise intégrée!
 
-## Features
+## Fonctionnalités
 
-- 💬 **Real-time messaging** - Socket.io powered
-- 🦫 **TI-GUY Bot** - Quebec beaver mascot that randomly responds
-- 🎙️ **Voice messages** - Record and send audio
-- 📹 **Video calls** - WebRTC ready
-- 👥 **Group chats** - Create "crews" 
-- 💰 **Payments** - Interac e-Transfer integration (coming soon)
-- 🎨 **Quebec themes** - Forest green, gold, and beaver vibes
+- 💬 **Messagerie en temps réel** - Propulsée par Socket.io
+- 🦫 **Robot TI-GUY** - Mascotte castor qui répond aléatoirement
+- 🎙️ **Messages vocaux** - Enregistre et envoie de l'audio
+- 📹 **Appels vidéo** - WebRTC prêt
+- 👥 **Discussions de groupe** - Crée des "crew" ou des "gangs"
+- 💰 **Paiements** - Intégration Interac (bientôt)
+- 🎨 **Thèmes québécois** - Vert forêt, or, et castor
 
-## Tech Stack
+## Stack Technique
 
 - **Frontend**: React + Vite + Tailwind CSS
 - **Backend**: Node.js + Express + Socket.io
-- **Database**: Supabase (PostgreSQL)
-- **Real-time**: Socket.io
+- **Base de données**: Supabase (PostgreSQL)
+- **Temps réel**: Socket.io
 
-## Getting Started
+## Démarrage
 
-### 1. Install dependencies
+### 1. Installer les dépendances
 
 ```bash
-# Install root dependencies
+# Installer les dépendances racine
 npm install
 
-# Install backend dependencies
+# Installer le backend
 cd backend
 npm install
 
-# Install frontend dependencies
+# Installer le frontend
 cd ../frontend
 npm install
 ```
 
-### 2. Start the servers
+### 2. Démarrer les serveurs
 
 ```bash
-# From root directory
+# Depuis le répertoire racine
 npm run dev
 ```
 
-This starts:
+Ça démarre:
 - Backend: http://localhost:3001
 - Frontend: http://localhost:5173
 
-### 3. Open the app
+### 3. Ouvrir l'application
 
-Go to http://localhost:5173 and start chatting!
+Va sur http://localhost:5173 et commence à chatter!
 
-## TI-GUY Bot Commands
+## Commandes TI-GUY
 
-TI-GUY randomly responds with Quebec slang:
+TI-GUY répond aléatoirement avec du joual québécois:
 - "Salut mon chum! 🦫"
 - "Osti que c'est beau ça!"
 - "Tabarnouche, raconte-moi plus!"
 
-Type `/nobot` to disable TI-GUY responses.
+Tape `/nobot` pour désactiver les réponses de TI-GUY.
 
-## Quebec Features
+## Fonctionnalités Québécoises
 
-- 🍁 **Language**: French + Joual (Quebec slang)
-- 🏒 **Themes**: Hockey, poutine, maple syrup
-- ⚜️ **Colors**: Forest green, gold, Canadian red
-- 🦫 **Mascot**: TI-GUY the beaver
+- 🍁 **Langue**: Français + Joual (argot québécois)
+- 🏒 **Thèmes**: Hockey, poutine, sirop d'érable
+- ⚜️ **Couleurs**: Vert forêt, or, rouge canadien
+- 🦫 **Mascotte**: TI-GUY le castor
 
-## Roadmap
+## Feuille de Route
 
-- [ ] Voice messages
-- [ ] Video calls (WebRTC)
-- [ ] File sharing
-- [ ] Group chats
+- [ ] Messages vocaux
+- [ ] Appels vidéo (WebRTC)
+- [ ] Partage de fichiers
+- [ ] Discussions de groupe
 - [ ] Interac e-Transfer
-- [ ] Quebec stickers
-- [ ] Moments feed
-- [ ] Mobile app (React Native)
+- [ ] Autocollants québécois
+- [ ] Fil d'actualité (Moments)
+- [ ] Application mobile (React Native)
 
-## Made with ❤️ in Québec
+## Fait avec ❤️ au Québec
 
 Fait avec fierté québécoise! ⚜️
+
+---
+
+**Développé par:** L'équipe OuiChat 🦫
+**Version:** 1.0.0
+**Licence:** MIT
