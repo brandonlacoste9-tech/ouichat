@@ -1,0 +1,23 @@
+{
+  "name": "ouichat",
+  "version": "1.0.0",
+  "description": "OuiChat - Quebec Superapp (WeChat for French Canada)",
+  "private": true,
+  "workspaces": [
+    "mobile",
+    "web",
+    "backend",
+    "miniapps/*"
+  ],
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:web": "cd web && npm run dev",
+    "dev:mobile": "cd mobile && npm start",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:web\"",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
