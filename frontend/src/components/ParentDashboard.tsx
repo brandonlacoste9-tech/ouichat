@@ -74,10 +74,10 @@ export const ParentDashboard: React.FC<ParentDashboardProps> = ({ socket, parent
       <div className="bg-green-800 text-white p-4 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🦫</span>
+            <span className="text-3xl">🐝</span>
             <div>
               <h1 className="text-xl font-bold">Tableau de bord parent</h1>
-              <p className="text-green-200 text-sm">OuiChat - Messagerie sécurisée</p>
+              <p className="text-green-200 text-sm">BEEChat - Messagerie sécurisée</p>
             </div>
           </div>
           <div className="flex gap-2">

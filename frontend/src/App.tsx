@@ -18,7 +18,7 @@ function App() {
     const newSocket = io(SOCKET_URL);
     
     newSocket.on('connect', () => {
-      console.log('✅ Connected to OuiChat');
+      console.log('✅ Connected to BEEChat');
       setIsConnected(true);
     });
 
@@ -89,8 +89,8 @@ function App() {
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
         {/* Logo */}
         <div className="text-center mb-8">
-          <span className="text-6xl">🦫</span>
-          <h1 className="text-3xl font-bold text-green-800 mt-4">OuiChat</h1>
+          <span className="text-6xl">🐝</span>
+          <h1 className="text-3xl font-bold text-green-800 mt-4">BEEChat</h1>
           <p className="text-gray-600 mt-2">
             La messagerie sécurisée pour ados du Québec
           </p>

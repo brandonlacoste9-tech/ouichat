@@ -1,6 +1,6 @@
-# 🦫 OuiChat
+# 🐝 BEEChat
 
-**Le WeChat du Québec** - Une application de messagerie avec la culture québécoise intégrée!
+**Le messager sécurisé pour ados du Québec** - Une application de messagerie avec la culture québécoise intégrée!
 
 ## Fonctionnalités
 
@@ -80,7 +80,7 @@ Tape `/nobot` pour désactiver les réponses de TI-GUY.
 
 ## Fait avec ❤️ au Québec
 
-Fait avec fierté québécoise! ⚜️
+Fait avec fierté québécoise! 🍁🐝 ⚜️
 
 ---
 

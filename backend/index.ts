@@ -1,5 +1,5 @@
 /**
- * 🦫 OuiChat Backend
+ * 🐝 BEEChat Backend
  * Messagerie sécurisée pour ados du Québec
  * Parent-approved messaging with safety monitoring
  */
@@ -277,5 +277,5 @@ app.get("/api/parent/:parentId/children", (req, res) => {
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
   console.log(`🦫 Serveur OuiChat démarré sur le port ${PORT}`);
-  console.log(`🔒 Mode sécurisé: parent-approved messaging activé`);
+  console.log(`🔒 Mode sécurisé: parent-approved messaging pour ados activé`);
 });

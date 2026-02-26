@@ -99,9 +99,9 @@ export const ChildChat: React.FC<ChildChatProps> = ({ socket, childId, username,
       <div className="bg-green-800 text-white p-4 shadow-lg">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🦫</span>
+            <span className="text-3xl">🐝</span>
             <div>
-              <h1 className="font-bold">OuiChat</h1>
+              <h1 className="font-bold">BEEChat</h1>
               <p className="text-xs text-green-200">Messagerie sécurisée - {username}</p>
             </div>
           </div>
@@ -112,11 +112,11 @@ export const ChildChat: React.FC<ChildChatProps> = ({ socket, childId, username,
         </div>
       </div>
 
-      {/* TI-GUY Warning */}
+      {/* BEE Warning */}
       {tiGuyMessage && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 animate-pulse">
           <div className="flex items-center gap-3 max-w-4xl mx-auto">
-            <span className="text-3xl">🦫</span>
+            <span className="text-3xl">🐝</span>
             <div>
               <p className="font-bold text-yellow-800">TI-GUY dit:</p>
               <p className="text-yellow-700">{tiGuyMessage}</p>
@@ -152,7 +152,7 @@ export const ChildChat: React.FC<ChildChatProps> = ({ socket, childId, username,
               </p>
               <div className="mt-6 bg-green-50 rounded-xl p-4 inline-block">
                 <p className="text-sm text-green-800 flex items-center gap-2">
-                  <span>🦫</span>
+                  <span>🐝</span>
                   TI-GUY veille sur toi! Utilise des mots gentils.
                 </p>
               </div>
